@@ -26,15 +26,20 @@ function getCities( event ) {
   
   const url = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${ufValue}/municipios?orderBy=nome"`
   
+  /*limpa o campo cidade a cada mudança de estado*/
+  citySelect.innerHTML = "<option value > Selecione a cidade </option> "  
+  citySelect.disabled = true
+  
   fetch( url )
   .then( res => res.json() )
   .then( cities => {
     
     for(  const city of cities ) {
-      citySelect.innerHTML += `<option value = " ${ city.id } "> ${ city.nome }</option>` //tem q ser crase
+      citySelect.innerHTML += `<option value = " ${ city.nome } "> ${ city.nome }</option>` //tem q ser crase
     }
     
     citySelect.disabled = false
+  
   } )
 }
 
@@ -42,3 +47,55 @@ document
   .querySelector( "select[name=uf]" )
   .onchange = getCities
   // .addEventListener( "change", getCities ) //só funciona no Chrome
+
+//itens de coleta
+
+const itensToColected = document.querySelectorAll( ".itens-grid li" )
+
+for( item of itensToColected ) {
+  item.addEventListener( "click", handleSelectedItem )
+}
+
+const collectedItens = document.querySelector( "input[name = itens ]" )
+
+let selectedItems = []
+
+function handleSelectedItem( event ) {
+  const itemLi = event.target
+  
+  // itemLi.classList.add( "selected" ) //adiciona classe
+  // itemLi.classList.remove( "selected" ) // remove classe
+  
+  itemLi.classList.toggle( "selected" ) // add e remove classe
+
+  const itemId = itemLi.dataset.id
+ 
+  /* verificar se existem itens selecionados, se sim
+  pegar os itens selecionados */
+
+  const alreadySelected = selectedItems.findIndex( item => {
+    const itemFound = item == itemId
+    return itemFound
+  } )
+
+  /* se já estiver selecionado, tirar da seleção*/
+
+  if( alreadySelected >= 0 ) {
+   //remover selecão
+
+    const filteredItens = selectedItems.filter( item => {
+      const itensIsDifferent = item != itemId
+      return itensIsDifferent
+    })
+  
+    selectedItems = filteredItens
+  } else {
+    /* se não estiver selecionado, adicionar a selecão */ 
+    selectedItems.push( itemId )
+  }
+  
+  /* atualizar o campo escondido com os itens selecionados */
+  collectedItens.value = selectedItems
+}
+
+  
